@@ -67,7 +67,7 @@ void sort(int arr[], int l, int r) {
 		return;
 	int i = l;
 	int j = r;
-	int pivotValue = arr[l];
+	int pivotValue = arr[r];
 	printf("pivotValue: %d\n", pivotValue);
 	while(i < j){
 		while(arr[i] <= pivotValue && i < r)
@@ -78,11 +78,11 @@ void sort(int arr[], int l, int r) {
 			swap(&arr[i], &arr[j]);
 	}
 	printf("i: %d - j: %d\n", i, j);
-	arr[l] = arr[j];
-	arr[j] = pivotValue;
+	arr[r] = arr[i];
+	arr[i] = pivotValue;
 	printArray(arr, 20);
-	sort(arr, l, j - 1);
-	sort(arr, j + 1, r);
+	sort(arr, l, i - 1);
+	sort(arr, i + 1, r);
 }
 
 void sort3way(int a[], int l, int r) {
@@ -141,7 +141,7 @@ void main(){
 		arr[i] = 50 - i;
 		printf("%d ", arr[i]);
 	}
-	sort(arr, 0, 19);
+	sort3way(arr, 0, 19);
 	printf("\nSorted array:\n");
 	for(i = 0; i < 20; i++){
 		printf("%d ", arr[i]);
