@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 
 typedef union {
 	int i;
@@ -27,26 +28,39 @@ int compare_jval_i(Jval *a, Jval *b);
 void swap_jval(Jval *a, Jval *b);
 void sort_gen ( Jval a[], int l, int r, int (*compare)(Jval*, Jval*) );
 int search_gen ( Jval a[], int l, int r, Jval item, int (*compare)(Jval*, Jval*) );
+Jval* create_array_i (int n);
 
 
 void main(){
-	printf("Hello, world!\n");
-	Jval arr[10];
-	for(int i = 0; i < 10; i++){
-		arr[i] = new_jval_i(10 - i);
+	srand(time(NULL));
+	int n;
+	int key;
+
+	//create array
+	printf("Enter n: ");
+	scanf("%d", &n);
+	Jval *arr = create_array_i(n);
+	
+	//print original array
+	for(int i = 0; i < n; i++){
 		printf("%d ", jval_i(arr[i]));
 	}
 	printf("\n");
-	sort_gen(arr, 0, 9, compare_jval_i);
-	for(int i = 0; i < 10; i++){
+
+	//sort array
+	sort_gen(arr, 0, n - 1, compare_jval_i);
+
+	//print sorted array
+	for(int i = 0; i < n; i++){
 		printf("%d ", jval_i(arr[i]));
 	}
+	printf("\n");
 
-	int n;
-	printf("Enter int to search: ");
-	scanf("%d", &n);
-	Jval item = new_jval_i(n);
-	printf("Result: %d\n", search_gen(arr, 0, 9, item, compare_jval_i));
+	//search
+	printf("Enter key to search: ");
+	scanf("%d", &key);
+	Jval item = new_jval_i(key);
+	printf("Result: %d\n", search_gen(arr, 0, n - 1, item, compare_jval_i));
 }
 
 void swap_jval(Jval *a, Jval *b){
@@ -54,6 +68,13 @@ void swap_jval(Jval *a, Jval *b){
 	*a = *b;
 	*b = temp;
 }
+
+Jval* create_array_i (int n) {
+	Jval * array = (Jval *) malloc(sizeof(Jval)*n);
+	for (int i=0; i<n; i++) array[i] = new_jval_i( rand() );
+	return array;
+}
+
 
 int compare_jval_i(Jval *a, Jval *b){
 	int int_a = jval_i(*a);
