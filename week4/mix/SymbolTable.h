@@ -20,9 +20,11 @@ typedef struct {
 	int (*compare)(void*, void*);
 } SymbolTable;
 
-SymbolTable createSymbolTable();
-void dropSymbolTable(SymbolTable* tab);
-void addEntry(void* key, void* value, SymbolTable* book);
-Entry* getEntry(void* key, SymbolTable book);
+SymbolTable *createSymbolTable(Entry (*makeNode)(void *, void *), int (*compare)(void *, void *));
+void dropSymbolTable(SymbolTable* tb);
+Entry* getEntry(void* key, SymbolTable *tb);
+void addEntry(void* key, void* value, SymbolTable *tb);
+void *getKeyFromEntry(Entry e);
+void *getValueFromEntry(Entry e);
 
 #endif

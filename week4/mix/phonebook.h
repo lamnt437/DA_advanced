@@ -4,23 +4,21 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "SymbolTable.h"
 
-typedef struct {
-	char name[80];
-	long number;
-} PhoneEntry;
+typedef Entry PhoneEntry;
 
-typedef struct {
-	PhoneEntry * entries;
-	int total;
-	int size;
-} PhoneBook;
+typedef SymbolTable PhoneBook;
 
-PhoneBook createPhoneBook();
+PhoneBook *createPhoneBook();
+int comparePhone(void *entryA, void *entryB);
+Entry makeNodePhone(void *key, void *value);
 void dropPhoneBook(PhoneBook* book);
-PhoneEntry * getPhoneNumber(char * name, PhoneBook book);
-void addPhoneNumber(char * name, long number, PhoneBook* book);
-void printEntry(PhoneEntry entry);
+PhoneEntry * getPhoneEntry(char * name, PhoneBook *book);
+void addPhoneEntry(char * name, long number, PhoneBook* book);
+char *getNameFromPhoneEntry(PhoneEntry e);
+long getNumberFromPhoneEntry(PhoneEntry e);
+void printPhoneEntry(PhoneEntry entry);
 void printPhoneBook(PhoneBook book);
 
 #endif

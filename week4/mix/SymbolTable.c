@@ -12,11 +12,13 @@
 // 	int (*compare)(void*, void*);
 // } SymbolTable;
 
-SymbolTable createSymbolTable(){
-	SymbolTable tb;
-	tb.entries = (Entry *)malloc(sizeof(Entry) * INITIAL_SIZE);
-	tb.size = INITIAL_SIZE;
-	tb.total = 0;
+SymbolTable *createSymbolTable(Entry (*makeNode)(void *, void *), int (*compare)(void *, void *)){
+	SymbolTable *tb = (SymbolTable *)malloc(sizeof(SymbolTable));
+	tb->entries = (Entry *)malloc(sizeof(Entry) * INITIAL_SIZE);
+	tb->size = INITIAL_SIZE;
+	tb->total = 0;
+	tb->makeNode = makeNode;
+	tb->compare = compare;
 
 	return tb;
 }
@@ -29,26 +31,27 @@ void dropSymbolTable(SymbolTable* tb){
 		free(tb->entries[i].value);
 	}
 	free(tb->entries);
+	free(tb);
 }
 
-Entry* getEntry(void* key, SymbolTable tb){
-	int total = tb.total;
+Entry* getEntry(void* key, SymbolTable *tb){
+	int total = tb->total;
 	int i;
 	Entry temp;
 	temp.key = key;
 
 	for(i = 0; i < total; i++){
-		if(tb.compare(&temp, &tb.entries[i]) == 0)
+		if(tb->compare(&temp, &tb->entries[i]) == 0)
 			break;
 	}
 	if(i < total)
-		return &tb.entries[i];
+		return &tb->entries[i];
 	return NULL;
 }
 
 void addEntry(void* key, void* value, SymbolTable *tb){
 	//check if key already exists
-	Entry *result = getEntry(key, *tb);
+	Entry *result = getEntry(key, tb);
 	if(result != NULL){
 		result->value = value;
 	}
@@ -70,4 +73,12 @@ void addEntry(void* key, void* value, SymbolTable *tb){
 		tb->entries[tb->total] = new_entry;
 		tb->total++;
 	}
+}
+
+void *getKeyFromEntry(Entry e){
+	return e.key;
+}
+
+void *getValueFromEntry(Entry e){
+	return e.value;
 }

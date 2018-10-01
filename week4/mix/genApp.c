@@ -1,45 +1,8 @@
-#include "SymbolTable.h"
-
-int comparePhone(void *entryA, void *entryB){
-	char *keyA = (char *)(((Entry *)entryA)->key);
-	char *keyB = (char *)(((Entry *)entryB)->key);
-	return strcmp(keyA, keyB);
-}
-
-Entry makeNodePhone(void *key, void *value){
-	Entry new_entry;
-	new_entry.key = strdup(key);
-	new_entry.value = (long *)malloc(sizeof(long));
-	memcpy(new_entry.value, value, sizeof(long));
-
-	return new_entry;
-}
-
-SymbolTable initPhoneBook(){
-	SymbolTable book = createSymbolTable();
-	book.makeNode = makeNodePhone;
-	book.compare = comparePhone;
-
-	return book;
-}
-
-void printPBEntry(Entry a){
-	printf("Name: %s\n", (char *)a.key);
-	printf("Number: %ld\n", *((long *)a.value));
-}
-
-void printPhoneBook(SymbolTable book){
-	int total = book.total;
-	int i;
-	for(i = 0; i < total; i++){
-		printf("%d.\n", i + 1);
-		printPBEntry(book.entries[i]);
-		printf("\n");
-	}
-}
+#include "phonebook.h"
 
 int main(){
-	SymbolTable book = initPhoneBook();
+	SymbolTable *tb = createPhoneBook();
+	SymbolTable book = *tb;
 
 	int choice;
 	char name[30];
@@ -60,7 +23,7 @@ int main(){
 				printf("Enter phone: ");
 				scanf("%ld", &number);
 
-				addEntry(name, &number, &book);
+				addPhoneEntry(name, number, &book);
 				break;
 			case 2:
 				//get
@@ -69,9 +32,9 @@ int main(){
 				fgets(name, 29, stdin);
 				name[strlen(name) - 1] = '\0';
 
-				Entry *result = getEntry(name, book);
+				Entry *result = getPhoneEntry(name, &book);
 				if(result)
-					printPBEntry(*result);
+					printPhoneEntry(*result);
 				else
 					printf("Not found!\n");
 
