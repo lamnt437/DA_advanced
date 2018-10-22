@@ -39,7 +39,8 @@ int main(int argc, char *argv[]){
 	char line[100];
 	char *temp = NULL;
 	while(fgets(line, 99, input_file) != NULL){
-		line[strlen(line) - 1] = '\0';
+		if(line[strlen(line) - 1] == '\n')
+			line[strlen(line) - 1] = '\0';
 		if(strcmp(line, "[STATIONS]") == 0)
 			continue;
 		if(strcmp(line, "[LINES]") == 0)
@@ -51,8 +52,9 @@ int main(int argc, char *argv[]){
 
 	//read metro line
 	int number_of_lines = 0;
-	while(fgets(line, 99, input_file) != NULL){		
-		line[strlen(line) - 1] = '\0';
+	while(fgets(line, 99, input_file) != NULL){	
+		if(line[strlen(line) - 1] == '\n')	
+			line[strlen(line) - 1] = '\0';
 		temp = strtok(line, "=");
 		temp = strtok(NULL, "=");
 		read_metro_line(g, temp);
@@ -112,6 +114,7 @@ void read_metro_line(Graph g, char *line){
 	int prev = 0;
 	int cur = 0;
 
+	printf("%s\n", line);
 	char line_cpy[100];
 	strcpy(line_cpy, line);
 
