@@ -113,50 +113,83 @@ int indegree(Graph graph, int v, int* output){
 //     return counter;
 // }
 
-// int dag_start;
-// int dag_check = 0;
+void BFS(Graph graph, int start, int stop, void (*func)(Graph, int)){
+    Dllist queue = new_dllist();
+    dll_append(queue, new_jval_i(start));
+    JRB visited = make_jrb();
 
-// void dag_visit(Graph g){
-//     dag_check = hasEdge(g, v, dag_start);
-// }
+    //loop until empty queue or meet stop value
+    while(!dll_empty(queue)){
+        //dequeue
+        Dllist node = dll_first(queue);
+        int v = jval_i(node->val);
+        dll_delete_node(node);
 
-// int DAG(Graph graph){
-//     // Dllist queue = new_dllist();
-//     // int start = 0;
-//     // dll_append(queue, new_jval_i(start)); 
-//     // JRB visited = make_jrb();
+        if(jrb_find_int(visited, v) == NULL){
+            func(graph, v);
+            jrb_insert_int(visited, v, new_jval_i(1));
+        }
 
-//     // //loop until empty queue or meet stop value
-//     // while(!dll_empty(queue)){
-//     //     //dequeue
-//     //     Dllist node = dll_first(queue);
-//     //     int v = jval_i(node->val);
-//     //     dll_delete_node(node);
+        if(v == stop)
+            break;
+        int output[100];
+        int n = outdegree(graph, v, output);
+        int i;
+        for(i = 0; i < n; i++){
+            if(jrb_find_int(visited, output[i]) == NULL)
+                dll_append(queue, new_jval_i(output[i]));
+        }
+    }
+    jrb_free_tree(visited);
+}
 
-//     //     if(jrb_find_int(visited, v) != NULL){//visit twice
-//     //         // func(v);
-//     //         // jrb_insert_int(visited, v, new_jval_i(1));
-//     //         jrb_free_tree(visited);
-//     //         return 1;
-//     //     }
+int dag_start;
+int dag_check = 0;
 
-//     //     int output[100];
-//     //     int n = getAdjacentVertices(graph, v, output);
-//     //     int i;
-//     //     for(i = 0; i < n; i++){
-//     //         if(jrb_find_int(visited, output[i]) == NULL)
-//     //             dll_append(queue, new_jval_i(output[i]));
-//     //     }
-//     // }
-//     // jrb_free_tree(visited);
-//     // return 0;
-//     JRB node;
-//     JRB dag_start;
-//     jrb_traverse(node, graph){
-//         dag_start = node;
-//         BFS(graph, dag_start, -1, dag_visit)
-//     }
-// }
+void dag_visit(Graph g, int v){
+    dag_check = hasEdge(g, v, dag_start);
+}
+
+int DAG(Graph graph){
+    // Dllist queue = new_dllist();
+    // int start = 0;
+    // dll_append(queue, new_jval_i(start)); 
+    // JRB visited = make_jrb();
+
+    // //loop until empty queue or meet stop value
+    // while(!dll_empty(queue)){
+    //     //dequeue
+    //     Dllist node = dll_first(queue);
+    //     int v = jval_i(node->val);
+    //     dll_delete_node(node);
+
+    //     if(jrb_find_int(visited, v) != NULL){//visit twice
+    //         // func(v);
+    //         // jrb_insert_int(visited, v, new_jval_i(1));
+    //         jrb_free_tree(visited);
+    //         return 1;
+    //     }
+
+    //     int output[100];
+    //     int n = getAdjacentVertices(graph, v, output);
+    //     int i;
+    //     for(i = 0; i < n; i++){
+    //         if(jrb_find_int(visited, output[i]) == NULL)
+    //             dll_append(queue, new_jval_i(output[i]));
+    //     }
+    // }
+    // jrb_free_tree(visited);
+    // return 0;
+    JRB node;
+    jrb_traverse(node, graph.vertices){
+        dag_check = 0;
+        dag_start = jval_i(node->key);
+        BFS(graph, dag_start, -1, dag_visit);
+        if(dag_check == 1)
+            return 0;
+    }
+    return 1;
+}
 
 void dropGraph(Graph graph){
     //traverse through tree
@@ -172,36 +205,6 @@ void dropGraph(Graph graph){
     }
     jrb_free_tree(graph.edges);
 }
-
-// void BFS(Graph graph, int start, int stop, void (*func)(int)){
-//     Dllist queue = new_dllist();
-//     dll_append(queue, new_jval_i(start));
-//     JRB visited = make_jrb();
-
-//     //loop until empty queue or meet stop value
-//     while(!dll_empty(queue)){
-//         //dequeue
-//         Dllist node = dll_first(queue);
-//         int v = jval_i(node->val);
-//         dll_delete_node(node);
-
-//         if(jrb_find_int(visited, v) == NULL){
-//             func(v);
-//             jrb_insert_int(visited, v, new_jval_i(1));
-//         }
-
-//         if(v == stop)
-//             break;
-//         int output[100];
-//         int n = outdegree(graph, v, output);
-//         int i;
-//         for(i = 0; i < n; i++){
-//             if(jrb_find_int(visited, output[i]) == NULL)
-//                 dll_append(queue, new_jval_i(output[i]));
-//         }
-//     }
-//     jrb_free_tree(visited);
-// }
 
 // void DFS(Graph graph, int start, int stop, void (*func)(int)){
 //     JRB visited = make_jrb();
