@@ -15,3 +15,4 @@ int outdegree(Graph graph, int v, int* output);
 int indegree(Graph graph, int v, int* output);
 int DAG(Graph graph);
 void dropGraph(Graph graph);
+void topologicalSort(Graph graph, int * output, int *n);
