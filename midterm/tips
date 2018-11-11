@@ -1,0 +1,4 @@
+don't copy paste
+use strdup in jrb_insert_str
+convert int to char + '0'
+
