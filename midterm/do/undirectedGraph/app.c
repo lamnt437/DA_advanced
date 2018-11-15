@@ -32,9 +32,10 @@ int inputGraph(Graph g, char *filename, int *row, int *col){
         while(temp){
             // printf("%s ", temp);
             if(strcmp(temp, "0") == 0){
-                id[0] = hang + '0';
-                id[1] = cot + '0';
-                id[2] = '\0';
+                // id[0] = hang + '0';
+                // id[1] = cot + '0';
+                // id[2] = '\0';
+                sprintf(id, "%.2d", hang * 10 + cot);
 
                 addVertex(g, id, id);
                 counter++;
