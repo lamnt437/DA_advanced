@@ -1,10 +1,11 @@
 #include "jrb_wgraph.h"
 #include "libfdr/jrb.h"
 #include "libfdr/dllist.h"
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
-#define INFINITIVE_VALUE 9999
+#define INFINITIVE_VALUE 1000000
 
 typedef struct nodeMap{
     int prev;
@@ -158,193 +159,140 @@ void BFS(Graph graph, int start, int stop, void (*func)(Graph, int)){
     free_dllist(queue);
 }
 
-Dllist minWeightInQueue(Dllist pqueue, JRB weightMap){
-    Dllist ptr;
-    double minWeight = INFINITIVE_VALUE;
-    Dllist minNodePtr;
+// void printQueue(Dllist queue){
+//     Dllist ptr;
+//     dll_traverse(ptr, queue){
+//         printf("%d ", jval_i(ptr->val));
+//     }
+//     printf("\n");
+// }
+
+// void printJRB(JRB visited){
+//     JRB ptr;
+//     jrb_traverse(ptr, visited){
+//         printf("%d ", jval_i(ptr->key));
+//     }
+//     printf("\n");
+// }
+
+int pdequeue(Dllist pqueue, JRB valueMap){
+    double minValue = INFINITIVE_VALUE;
+    double temp;
+
+    Dllist ptr, minNodePtr;
+    int minNode;
+
     dll_traverse(ptr, pqueue){
-        int nodeId = jval_i(ptr->val);
-        JRB weightPtr = jrb_find_int(weightMap, nodeId);
-        NodeMap *mapVal = (NodeMap *)jval_v(weightPtr->val);
-        double weightVal = mapVal->val;
-        if(weightVal < minWeight){
-            minWeight = weightVal;
+        int currentNode = jval_i(ptr->val);
+        JRB jrb_ptr = jrb_find_int(valueMap, currentNode);
+        temp = jval_d(jrb_val(jrb_ptr));
+        if(temp < minValue){
+            minValue = temp;
             minNodePtr = ptr;
+            minNode = currentNode;
         }
     }
-    return minNodePtr;
+
+    dll_delete_node(minNodePtr);
+    return minNode;
 }
 
-double shortestPath(Graph graph, int s, int t, int *path, int *length){
-    //find s
-    JRB ptr = jrb_find_int(graph.egdes, s);
-    if(ptr == NULL) return INFINITIVE_VALUE;
+int checkInQueue(Dllist pqueue, int v){
+    Dllist ptr;
+    dll_traverse(ptr, pqueue){
+        if(jval_i(ptr->val) == v)
+            return 1;
+    }
+    return 0;
+}
 
+double shortestPath(Graph graph, int s, int t, int *length, int *path){
+    //find s
+    *length = 0;
+
+    JRB sPtr = jrb_find_int(graph.edges, s);
+    if(sPtr == NULL) return INFINITIVE_VALUE;
+
+    //init
     Dllist pqueue = new_dllist();
-    JRB weightMap = make_jrb();
     JRB visited = make_jrb();
+    JRB valueMap = make_jrb();
+    JRB parentMap = make_jrb();
 
     //enqueue s
     dll_append(pqueue, new_jval_i(s));
-    NodeMap *mapVal = (NodeMap *)malloc(sizeof(NodeMap));
-    mapVal->val = 0;
-    mapVal->prev = s;
-    jrb_insert_int(weightMap, s, new_jval_v(mapVal));
+    jrb_insert_int(valueMap, s, new_jval_i(0));
+    jrb_insert_int(parentMap, s, new_jval_i(s));
+
+    int parentNode = -1;
 
     while(!dll_empty(pqueue)){
-        //dequeue minWeight
-        Dllist minNodePtr = minWeightInQueue(pqueue, weightMap);
-        int minNode = jval_i(minNodePtr->val);
-        dll_delete_node(minNodePtr);
+        //pdequeue
+        parentNode = pdequeue(pqueue, valueMap);
+        JRB checkVisit = jrb_find_int(visited, parentNode);
+        if(checkVisit != NULL) continue;
 
-        //insert minNode to visited
-        jrb_insert_int(visited, minNode, new_jval_i(1));
+        jrb_insert_int(visited, parentNode, new_jval_i(1));
 
+        if(parentNode == t)
+            break;
+
+        int parentVal = jval_i(jrb_val(jrb_find_int(valueMap, parentNode)));
+        //get adjacent list
         int outList[100];
-        int numberOfOut = outdegree(graph, minNode, outList);
+        int numberOfOut = outdegree(graph, parentNode, outList);
 
-        JRB weightPtr = jrb_find_int(weightMap, minNode);
-        double minNodeWeight = weightPtr->val;
-
-        int i;
-        for(i = 0; i < numberOfOut, i++){   //APPEND TO PQ______________________________
-            if(jrb_find_int(visited, outList[i]) != NULL)
-                continue;
-
-            double edgeValue = getEdgeValue(graph, minNode, outList[i]);
-            double newWeight = minNodeWeight + edgeValue;
-
-            NodeMap *newWeightVal = (NodeMap *)malloc(sizeof(NodeMap));
-            newWeightVal->prev = minNode;
-            newWeightVal->val = newWeight;
-
+        //foreach elm in adjacent list 
+        for(int i = 0; i < numberOfOut; i++){
+            //check visit
+            checkVisit = jrb_find_int(visited, outList[i]);
+            if(checkVisit != NULL) continue;
+            //enqueue
+            if(!checkInQueue(pqueue, outList[i]))
+                dll_append(pqueue, new_jval_i(outList[i]));
             //relax
-            ptr = jrb_find_int(weightMap, outList[i]);
-            if(ptr == NULL){
-                jrb_insert_int(weightMap, outList[i], new_jval_v(newWeightVal));
+            int newVal = parentVal + getEdgeValue(graph, parentNode, outList[i]);
+            JRB currentValPtr = jrb_find_int(valueMap, outList[i]);
+            if(currentValPtr == NULL){
+                jrb_insert_int(valueMap, outList[i], new_jval_i(newVal));
+                jrb_insert_int(parentMap, outList[i], new_jval_i(parentNode));
             }
             else{
-                NodeMap *currentWeightPtr = (NodeMap *)jval_v(ptr->val);
-                double currentWeight = currentWeightPtr->val;
-
-                if(newWeight < currentWeight){
-                    currentWeightPtr->val = newWeight;
-                    currentWeightPtr->prev = minNode;
+                int currentVal = jval_i(currentValPtr->val);
+                if(newVal < currentVal){
+                    currentValPtr->val = new_jval_i(newVal);
+                    JRB currentParPtr = jrb_find_int(parentMap, outList[i]);
+                    currentParPtr->val = new_jval_i(parentNode);
                 }
             }
         }
     }
 
+    if(parentNode != t)
+        return INFINITIVE_VALUE;
+
+    int pathWeight = jval_i(jrb_val(jrb_find_int(valueMap, parentNode)));
     int counter = 0;
-    double shortestPath = INFINITIVE_VALUE;
-
-    //find t in weightMap, if not exist return infinitive value
-    JRB tPtr = jrb_find_int(weightMap, t);
-    if(tPtr != NULL){
-        //get weight of t assign to shortestPath
-        NodeMap *tWeightPtr = (NodeMap *)jval_v(tPtr->val);
-        double tWeight = tWeightPtr->val;
-        shortestPath = tWeight;
-
-        path[counter] = t;
+    while(1){
+        path[counter] = parentNode;
         counter++;
+        if(parentNode == s)
+            break;
+        parentNode = jval_i(jrb_val(jrb_find_int(parentMap, parentNode)));
+    }
 
-        //loop prev until find s
-        int prev = tWeightPtr->prev;
-        while(1){
-            path[counter] = prev;
-            counter++;
+    //reverse path
+    int start = 0, end = counter - 1;
+    int temp;
 
-            if(prev == s)
-                break;
-
-            JRB prevPtr = jrb_find_int(weightMap, prev);
-            NodeMap *prevWeightPtr = (NodeMap *)jval_v(prevPtr->val);
-            prev = prevWeightPtr->prev;
-        }
+    while(start < end){
+        temp = path[start];
+        path[start] = path[end];
+        path[end] = temp;
+        start++;
+        end--;
     }
 
     *length = counter;
-    return shortestPath;
-}
-
-int dag_start;
-int dag_check = 0;
-
-void dag_visit(Graph g, int v){
-    dag_check = hasEdge(g, v, dag_start);
-}
-
-int DAG(Graph graph){
-    JRB node;
-    dag_check = 0;
-    jrb_traverse(node, graph.vertices){
-        dag_start = jval_i(node->key);
-        DFS(graph, dag_start, -1, dag_visit);
-        if(dag_check != 0)
-            return 0;
-    }
-    return 1;
-}
-
-void dropGraph(Graph graph){
-    //traverse through tree
-    JRB ptr;
-    jrb_traverse(ptr, graph.vertices){
-        //free sub-tree
-        free(jval_s(ptr->val));
-    }
-    jrb_free_tree(graph.vertices);
-
-    jrb_traverse(ptr, graph.edges){
-        jrb_free_tree((JRB)jval_v(ptr->val));
-    }
-    jrb_free_tree(graph.edges);
-}
-
-void topologicalSort(Graph graph, int * output, int *n){
-    //create indegree table
-    JRB indegreeTable = make_jrb();
-    Dllist queue = new_dllist();
-    
-    JRB ptr;
-    int inNumber;
-    int inList[100];
-    int outNumber;
-    int outList[100];
-    int i;
-
-    jrb_traverse(ptr, graph.vertices){
-        int verticeIndex = jval_i(ptr->key);
-        inNumber = indegree(graph, verticeIndex, inList);
-        jrb_insert_int(indegreeTable, verticeIndex, new_jval_i(inNumber));
-        if(inNumber == 0){
-            dll_append(queue, new_jval_i(verticeIndex));
-        }
-    }
-
-    //sort
-    int counter = 0;
-    while(!dll_empty(queue)){
-        Dllist dequeuedNode = dll_first(queue);
-        int visitingVertice = jval_i(dll_val(dequeuedNode));
-        dll_delete_node(dequeuedNode);
-
-        output[counter] = visitingVertice;
-        counter++;
-
-        outNumber = outdegree(graph, visitingVertice, outList);
-        for(i = 0; i < outNumber; i++){
-            JRB decreaseIndegreeNode = jrb_find_int(indegreeTable, outList[i]);
-            int newIndegree = jval_i(decreaseIndegreeNode->val) - 1;
-            decreaseIndegreeNode->val = new_jval_i(newIndegree);
-
-            if(newIndegree == 0)
-                dll_append(queue, new_jval_i(outList[i]));
-        }
-    }
-
-    *n = counter;
-    jrb_free_tree(indegreeTable);
-    free_dllist(queue);
+    return pathWeight;
 }

@@ -13,4 +13,6 @@ void addEdge(Graph graph, int v1, int v2, double weight);
 double getEdgeValue(Graph graph, int v1, int v2);
 int outdegree(Graph graph, int v, int* output);
 int indegree(Graph graph, int v, int* output);
-double shortestPath(Graph graph, int s, int t, int *length, int *path);
+int DAG(Graph graph);
+void dropGraph(Graph graph);
+void topologicalSort(Graph graph, int * output, int *n);
