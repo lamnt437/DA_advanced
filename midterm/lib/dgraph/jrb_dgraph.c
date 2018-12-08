@@ -12,17 +12,17 @@ Graph createGraph(){
     return g;
 }
 
-void addVertex(Graph graph, int id, char *name){
+void addVertex(Graph graph, int id, int value){
     JRB node = jrb_find_int(graph.vertices, id);
     if(node == NULL)
-        jrb_insert_int(graph.vertices, id, new_jval_s(strdup(name)));
+        jrb_insert_int(graph.vertices, id, new_jval_i(value));
 }
 
-char *getVertex(Graph graph, int id){
+int getVertex(Graph graph, int id){
     JRB node = jrb_find_int(graph.vertices, id);
     if(node != NULL)
-        return jval_s(node->val);
-    return NULL;
+        return jval_i(node->val);
+    return -1;
 }
 
 void addEdge(Graph graph, int v1, int v2){//from v1 to v2
