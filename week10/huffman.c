@@ -25,11 +25,13 @@ void jrb_increment_val(JRB ptr){
 	ptr->val = new_jval_i(new_val);
 }
 
-void getCode(HuffmanTree tree, char *root_key){
+// void getCode(HuffmanTree tree, char *root_key){
+void createHuffmanTable(HuffmanTree tree, Coding *htable){
 	Dllist node_queue = new_dllist();
 	JRB current_string_map = make_jrb();
 
 	//enqueue root
+	char *root_key = jval_s(tree.root->key);
 	dll_append(node_queue, new_jval_s(strdup(root_key)));
 	jrb_insert_str(current_string_map, root_key, new_jval_s(""));
 
@@ -59,8 +61,8 @@ void getCode(HuffmanTree tree, char *root_key){
         //if leaf, insert to huffmanTable
         if(number_of_out_nodes == 0){
         	char c = key[0];
-        	huffmanTable[c].size = strlen(temp);
-        	strcpy(huffmanTable[c].bits, temp);
+        	htable[c].size = strlen(temp);
+        	strcpy(htable[c].bits, temp);
         }
         //else, create code for children then enqueue
         else{
@@ -213,7 +215,7 @@ int main(){
 		s[strlen(s) - 1] = '\0';
 
 	HuffmanTree tree = contruct_huffman_tree(s);
-	getCode(tree, jval_s(tree.root->key));
+	createHuffmanTable(tree, huffmanTable);
 
 	for(int i = 0; i < 256; i++){
 		if(strcmp(huffmanTable[i].bits, "") != 0)

@@ -8,11 +8,13 @@ void jrb_increment_val(JRB ptr){
 	ptr->val = new_jval_i(new_val);
 }
 
-void getCode(HuffmanTree tree, char *root_key){
+// void getCode(HuffmanTree tree, char *root_key){
+void createHuffmanTable(HuffmanTree tree, Coding *htable){
 	Dllist node_queue = new_dllist();
 	JRB current_string_map = make_jrb();
 
 	//enqueue root
+	char *root_key = jval_s(tree.root->key);
 	dll_append(node_queue, new_jval_s(strdup(root_key)));
 	jrb_insert_str(current_string_map, root_key, new_jval_s(""));
 
@@ -42,8 +44,8 @@ void getCode(HuffmanTree tree, char *root_key){
         //if leaf, insert to huffmanTable
         if(number_of_out_nodes == 0){
         	char c = key[0];
-        	huffmanTable[c].size = strlen(temp);
-        	strcpy(huffmanTable[c].bits, temp);
+        	htable[c].size = strlen(temp);
+        	strcpy(htable[c].bits, temp);
         }
         //else, create code for children then enqueue
         else{
@@ -89,15 +91,25 @@ void test_pdequeue(Dllist pqueue, JRB valueMap){
 	}
 }
 
-HuffmanTree contruct_huffman_tree(char *string){
+// HuffmanTree contruct_huffman_tree(char *string){
+HuffmanTree makeHuffman(FILE *in){
+	HuffmanTree new_tree;
+	new_tree.root = NULL;
+
+	if(in == NULL) return new_tree;
+
 	//BUILT FREQUENCY MAP
 	JRB freqMap = make_jrb();
 	Dllist pqueue = new_dllist();
 
-	int length = strlen(string);
-	for(int i = 0; i < length; i++){
+	// int length = strlen(string);
+	// for(int i = 0; i < length; i++){
+	int get_status;
+	char c;
+	while((get_status = fscanf(in, "%c", &c)) > 0){
+		printf("%c", c);
 		char *temp = (char *)malloc(sizeof(char) * 50);
-		sprintf(temp, "%c", string[i]);
+		sprintf(temp, "%c", c);
 		JRB char_search = jrb_find_str(freqMap, temp);
 		if(char_search == NULL){
 			jrb_insert_str(freqMap, temp, new_jval_i(1));
@@ -174,9 +186,6 @@ HuffmanTree contruct_huffman_tree(char *string){
 	}
 
 	//CONSTRUCT TREE
-
-	HuffmanTree new_tree;
-	new_tree.root = NULL;
 
 	if(first != NULL){
 		jrb_ptr = jrb_find_str(huffman.vertices, first);

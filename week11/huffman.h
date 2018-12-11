@@ -17,8 +17,8 @@ typedef struct {
 	int size;
 	char bits[9];
 } Coding;
-Coding huffmanTable[256];
 
-void getCode(HuffmanTree tree, char *root_key);
-HuffmanTree contruct_huffman_tree(char *string);
+void createHuffmanTable(HuffmanTree tree, Coding *htable);
+// HuffmanTree contruct_huffman_tree(char *string);
+HuffmanTree makeHuffman(FILE *in);
 

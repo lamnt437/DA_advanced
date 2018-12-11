@@ -5,6 +5,7 @@
 //    Graph graph;
 //    JRB root;
 // } HuffmanTree;
+Coding huffmanTable[256];
 
 
 typedef struct {
@@ -115,27 +116,79 @@ HuffmanTreeArray tree2array(HuffmanTree tree){
 	return huffman;
 }
 
-int main(){
-	char s[100];
-	
-	printf("Enter a string: ");
-	fgets(s, 99, stdin);
-	if(s[strlen(s) - 1] == '\n')
-		s[strlen(s) - 1] = '\0';
+void compressFile(FILE* in, FILE *out){
+	if(in == NULL){
+		return;
+	}
 
-	HuffmanTree tree = contruct_huffman_tree(s);
-	getCode(tree, jval_s(tree.root->key));	
+	HuffmanTree tree = makeHuffman(in);
+	createHuffmanTable(tree, huffmanTable);
+	HuffmanTreeArray treeArray = tree2array(tree);
+
+	fprintf(out, "HM ");
+	fprintf(out, "%d ", treeArray.size);
+	for(int i = 0; i < treeArray.size; i++){
+		fprintf(out, "%d ", treeArray.nodes[i]);
+	}
+
+	char data[100000];
+	char c;
+	int get_status;
+	int size_counter = 0;
+	int end_ptr = 0;
+	
+	rewind(in);
+	while((get_status = fscanf(in, "%c", &c)) > 0){
+		char *encoded_temp = huffmanTable[c].bits;
+		size_counter += huffmanTable[c].size;
+		printf("%s\n", encoded_temp);
+		sprintf(&data[end_ptr], "%s", encoded_temp);
+		end_ptr = strlen(data);
+	}
+
+	fprintf(out, "%d ", size_counter);
+	fprintf(out, "%s", data);
+}
+
+int main(int argc, char *argv[]){
+	if(argc != 2){
+		puts("Wrong number of arguments!");
+		return 1;
+	}
+
+	FILE *input = fopen(argv[1], "r");
+	if(input == NULL){
+		printf("%s", argv[1]);
+		puts("Input file doesn't exist!");
+		return 2;
+	}
+	FILE *output = fopen("out_data.txt", "w");
+
+	// char s[100];
+	
+	// printf("Enter a string: ");
+	// fgets(s, 99, stdin);
+	// if(s[strlen(s) - 1] == '\n')
+	// 	s[strlen(s) - 1] = '\0';
+
+	// HuffmanTree tree = makeHuffman(input);	
+	// createHuffmanTable(tree, huffmanTable);
 
 	// for(int i = 0; i < 256; i++){
 	// 	if(strcmp(huffmanTable[i].bits, "") != 0)
 	// 		printf("%c: %s\n", i, huffmanTable[i].bits);
 	// }
 
-	HuffmanTreeArray huffmanArray = tree2array(tree);
-	int size = huffmanArray.size;
-	for(int i = 0; i < size; i++){
-		printf("%d ", huffmanArray.nodes[i]);
-	}
+	// HuffmanTreeArray huffmanArray = tree2array(tree);
+	// int size = huffmanArray.size;
+	// for(int i = 0; i < size; i++){
+	// 	printf("%d ", huffmanArray.nodes[i]);
+	// }
+	// printf("\n");
+	compressFile(input, output);
+
+	// fclose(input);
+	// fclose(output);
 
 	return 0;
 }
