@@ -1,17 +1,4 @@
-#include "huffman.h"
-#define ARRAY_LENGTH 100
-
-// typedef struct {
-//    Graph graph;
-//    JRB root;
-// } HuffmanTree;
-Coding huffmanTable[256];
-
-
-typedef struct {
-	int size;
-	int * nodes;
-} HuffmanTreeArray;
+#include "huffmanArray.h"
 
 // HuffmanTree contruct_huffman_tree(char *string);
 
@@ -125,8 +112,8 @@ void compressFile(FILE* in, FILE *out){
 	createHuffmanTable(tree, huffmanTable);
 	HuffmanTreeArray treeArray = tree2array(tree);
 
-	fprintf(out, "HM ");
-	fprintf(out, "%d ", treeArray.size);
+	fprintf(out, "HM ");							//huffman prefix
+	fprintf(out, "%d ", treeArray.size);			
 	for(int i = 0; i < treeArray.size; i++){
 		fprintf(out, "%d ", treeArray.nodes[i]);
 	}
@@ -150,45 +137,49 @@ void compressFile(FILE* in, FILE *out){
 	fprintf(out, "%s", data);
 }
 
-int main(int argc, char *argv[]){
-	if(argc != 2){
-		puts("Wrong number of arguments!");
-		return 1;
-	}
-
-	FILE *input = fopen(argv[1], "r");
-	if(input == NULL){
-		printf("%s", argv[1]);
-		puts("Input file doesn't exist!");
-		return 2;
-	}
-	FILE *output = fopen("out_data.txt", "w");
-
-	// char s[100];
+void decompressFile(FILE *in, FILE *out){
+	//read huffman tree array
+	char stream[10];
+	fscanf(in, "%s", stream);
 	
-	// printf("Enter a string: ");
-	// fgets(s, 99, stdin);
-	// if(s[strlen(s) - 1] == '\n')
-	// 	s[strlen(s) - 1] = '\0';
+	if(strcmp(stream, "HM") != 0)
+		return;
 
-	// HuffmanTree tree = makeHuffman(input);	
-	// createHuffmanTable(tree, huffmanTable);
+	int size;
+	int value;
+	fscanf(in, "%d", &size);
 
-	// for(int i = 0; i < 256; i++){
-	// 	if(strcmp(huffmanTable[i].bits, "") != 0)
-	// 		printf("%c: %s\n", i, huffmanTable[i].bits);
-	// }
+	int *treeArray = (int *)malloc(sizeof(int) * size);
+	for(int i = 0; i < size; i++){
+		fscanf(in, "%d", &value);
+		treeArray[i] = value;
+	}
 
-	// HuffmanTreeArray huffmanArray = tree2array(tree);
-	// int size = huffmanArray.size;
-	// for(int i = 0; i < size; i++){
-	// 	printf("%d ", huffmanArray.nodes[i]);
-	// }
-	// printf("\n");
-	compressFile(input, output);
+	//decode
+	char c;
+	char temp[2];
+	fscanf(in, "%d", &size);
+	int ptr = 0;
 
-	// fclose(input);
-	// fclose(output);
+	fscanf(in, "%c", &c);
+	for(int i = 0; i < size; i++){
+		fscanf(in, "%c", &c);
+		sprintf(temp, "%c", c);
+		value = atoi(temp);
 
-	return 0;
+		//0 - go left
+		if(value == 0)
+			ptr = ptr * 2 + 1;
+
+		//1 - go right
+		else
+			ptr = ptr * 2 + 2;
+
+		//check if is leaf
+		if(treeArray[ptr] != 0 && treeArray[ptr] != -1){
+			printf("%c", treeArray[ptr]);
+			fprintf(out, "%c", treeArray[ptr]);
+			ptr = 0;
+		}
+	}
 }

@@ -195,22 +195,3 @@ HuffmanTree makeHuffman(FILE *in){
 
 	return new_tree;
 }
-
-// int main(){
-// 	char s[100];
-	
-// 	printf("Enter a string: ");
-// 	fgets(s, 99, stdin);
-// 	if(s[strlen(s) - 1] == '\n')
-// 		s[strlen(s) - 1] = '\0';
-
-// 	HuffmanTree tree = contruct_huffman_tree(s);
-// 	getCode(tree, jval_s(tree.root->key));
-
-// 	for(int i = 0; i < 256; i++){
-// 		if(strcmp(huffmanTable[i].bits, "") != 0)
-// 			printf("%c: %s\n", i, huffmanTable[i].bits);
-// 	}
-
-// 	return 0;
-// }

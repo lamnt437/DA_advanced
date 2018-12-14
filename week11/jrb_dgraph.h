@@ -1,3 +1,6 @@
+#ifndef _jrb_dgraph_h_
+#define _jrb_dgraph_h_
+
 #include "libfdr/jrb.h"
 #define INFINITIVE_VALUE 1000000
 
@@ -18,3 +21,6 @@ void dropGraph(Graph graph);
 void BFS(Graph graph, int start, int stop, void (*func)(int));
 void DFS(Graph graph, int start, int stop, void (*func)(int));
 int shortestPath(Graph graph, char * start, char * stop, char path[][5]);
+
+
+#endif
