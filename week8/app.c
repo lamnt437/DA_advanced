@@ -3,6 +3,10 @@
 #include "jrb_dgraph.h"
 #include "libfdr/dllist.h"
 
+void printV(Graph g, int v){
+	printf("%d ", v);
+}
+
 void main(){
 	// Graph g = createGraph();
 	// int x;
@@ -46,13 +50,16 @@ void main(){
 	addVertex(g, 4, "CS311"); addVertex(g, 5, "MATH300");
 	addEdge(g, 0, 1); addEdge(g, 0, 2);
 	addEdge(g, 1, 3); addEdge(g, 5, 4); addEdge(g, 3, 4);
-	if(DAG(g)){
-		topologicalSort(g, output, &n);
-		printf("The topological order:\n");
-		for (i=0; i<n; i++)
-			printf("%s\n", getVertex(g, output[i]));
-	}
-	else{
-		printf("Can not make topological sort\n"); 
-	}
+	// if(DAG(g)){
+	// 	topologicalSort(g, output, &n);
+	// 	printf("The topological order:\n");
+	// 	for (i=0; i<n; i++)
+	// 		printf("%s\n", getVertex(g, output[i]));
+	// }
+	// else{
+	// 	printf("Can not make topological sort\n"); 
+	// }
+	printf("DFS from 1 to 4:\n");
+	DFS(g, 1, 4, printV);
+
 }
